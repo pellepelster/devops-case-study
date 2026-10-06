@@ -1,0 +1,139 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: app-alerts
+spec:
+  groups:
+    - name: app-symptoms
+      rules:
+        - alert: BackendApiHighErrorRate
+          expr: |
+            sum(rate(backend_api_requests_total{exported_endpoint="/process", status=~"5.."}[5m]))
+            /
+            sum(rate(backend_api_requests_total{exported_endpoint="/process"}[5m]))
+            > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            service: backend-api
+          annotations:
+            summary: "backend-api: {{ $value | humanizePercentage }} of /process requests fail with 5xx"
+        - alert: BackendApiElevatedErrorRate
+          expr: |
+            sum(rate(backend_api_requests_total{exported_endpoint="/process", status=~"5.."}[30m]))
+            /
+            sum(rate(backend_api_requests_total{exported_endpoint="/process"}[30m]))
+            > 0.01
+          for: 5m
+          labels:
+            severity: warning
+            service: backend-api
+          annotations:
+            summary: "backend-api: sustained {{ $value | humanizePercentage }} 5xx on /process over 30m"
+        - alert: BackendApiHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(backend_api_request_duration_seconds_bucket{exported_endpoint="/process"}[5m]))
+            ) > 0.25
+          for: 10m
+          labels:
+            severity: warning
+            service: backend-api
+          annotations:
+            summary: "backend-api: /process p95 latency is {{ $value | humanizeDuration }}"
+        - alert: BackendApiNoTraffic
+          expr: |
+            sum(rate(backend_api_requests_total{exported_endpoint="/process"}[5m])) == 0
+            or
+            absent(backend_api_requests_total{exported_endpoint="/process"})
+          for: 5m
+          labels:
+            severity: warning
+            service: backend-api
+          annotations:
+            summary: "backend-api: no /process requests for 5 minutes"
+        - alert: MlApiHighErrorRate
+          expr: |
+            sum(rate(ml_api_requests_total{exported_endpoint="/predict", status=~"5.."}[5m]))
+            /
+            sum(rate(ml_api_requests_total{exported_endpoint="/predict"}[5m]))
+            > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            service: ml-api
+          annotations:
+            summary: "ml-api: {{ $value | humanizePercentage }} of /predict requests fail with 5xx"
+        - alert: MlApiElevatedErrorRate
+          expr: |
+            sum(rate(ml_api_requests_total{exported_endpoint="/predict", status=~"5.."}[30m]))
+            /
+            sum(rate(ml_api_requests_total{exported_endpoint="/predict"}[30m]))
+            > 0.01
+          for: 5m
+          labels:
+            severity: warning
+            service: ml-api
+          annotations:
+            summary: "ml-api: sustained {{ $value | humanizePercentage }} 5xx on /predict over 30m"
+        - alert: MlApiHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(ml_api_request_duration_seconds_bucket{exported_endpoint="/predict"}[5m]))
+            ) > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: ml-api
+          annotations:
+            summary: "ml-api: /predict p95 latency is {{ $value | humanizeDuration }}"
+        - alert: MlApiNoTraffic
+          expr: |
+            sum(rate(ml_api_requests_total{exported_endpoint="/predict"}[5m])) == 0
+            or
+            absent(ml_api_requests_total{exported_endpoint="/predict"})
+          for: 5m
+          labels:
+            severity: warning
+            service: ml-api
+          annotations:
+            summary: "ml-api: no /predict requests for 5 minutes"
+    - name: app-availability
+      rules:
+        - alert: DeploymentNoReplicasAvailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace=~"backend-api|ml-api|postgres", deployment=~"backend-api|ml-api|postgres"} == 0
+            and
+            kube_deployment_spec_replicas > 0
+          for: 1m
+          labels:
+            severity: critical
+            service: "{{ $labels.deployment }}"
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.deployment }}: no replicas available"
+        - alert: DeploymentDegraded
+          expr: |
+            kube_deployment_status_replicas_available{namespace=~"backend-api|ml-api|postgres|load-generator"}
+            <
+            kube_deployment_spec_replicas
+          for: 5m
+          labels:
+            severity: warning
+            service: "{{ $labels.deployment }}"
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.deployment }}: only {{ $value }} replicas available"
+        - alert: MetricsTargetDown
+          expr: |
+            up{job=~"backend-api|ml-api|postgres-exporter-prometheus-postgres-exporter"} == 0
+            or
+            absent(up{job="backend-api"})
+            or
+            absent(up{job="ml-api"})
+            or
+            absent(up{job="postgres-exporter-prometheus-postgres-exporter"})
+          for: 2m
+          labels:
+            severity: warning
+            service: "{{ $labels.job }}"
+          annotations:
+            summary: "{{ $labels.job }}: metrics target {{ $labels.pod }} is down or missing"
