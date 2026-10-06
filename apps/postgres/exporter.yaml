@@ -25,3 +25,9 @@ spec:
     serviceMonitor:
       enabled: true
       interval: 30s
+      # labels expected by the variables of Grafana dashboard 9628
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: kubernetes_namespace
+        - targetLabel: release
+          replacement: postgres-exporter
