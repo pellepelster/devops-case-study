@@ -1,0 +1,16 @@
+[tools]
+k3d = "5.9.0"
+flux2 = "2.9.6"
+k9s = "0.51.0"
+
+[env]
+
+[tasks.bootstrap]
+description = "Create the k3d cluster and bootstrap Flux from a fork"
+env = { GITHUB_TOKEN = "{{ exec(command='pass github/voize/token') }}" }
+run = './bootstrap/bootstrap.sh --local https://github.com/pellepelster/devops-case-study'
+
+[tasks.k9s]
+description = "Inspect the k3d cluster with k9s"
+raw = true
+run = 'EDITOR=nano k9s --context k3d-devops-cs'
