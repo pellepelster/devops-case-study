@@ -1,3 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources: []
+namespace: monitoring
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: grafana-dashboard-devops-case-study
+    files:
+      - devops-case-study.json=devops-case-study.json
+    options:
+      labels:
+        grafana_dashboard: "1"
