@@ -15,6 +15,27 @@ spec:
       labels:
         app: backend-api
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do sleep 2; done
+          env:
+            - name: DB_HOST
+              value: "postgres.postgres.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "voize"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
       containers:
         - name: backend-api
           image: ghcr.io/voize-gmbh/devops-case-study/backend-api:v1
