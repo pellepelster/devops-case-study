@@ -199,3 +199,92 @@ spec:
             service: postgres
           annotations:
             summary: "postgres-exporter-prometheus-postgres-exporter: {{ if $labels.pod }}metrics target {{ $labels.pod }} is down{{ else }}no metrics targets found{{ end }}"
+    - name: database
+      rules:
+        - alert: PostgresDown
+          expr: |
+            pg_up{namespace="postgres"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: postgres
+          annotations:
+            summary: "postgres: the database does not accept connections"
+    - name: service-resources
+      rules:
+        - alert: BackendApiMemoryNearLimit
+          expr: |
+            max by (namespace, pod) (
+              container_memory_working_set_bytes{namespace="backend-api", container="backend-api"}
+              / on (namespace, pod, container)
+              kube_pod_container_resource_limits{namespace="backend-api", container="backend-api", resource="memory"}
+            ) > 0.85
+          for: 2m
+          labels:
+            severity: warning
+            service: backend-api
+          annotations:
+            summary: "backend-api: pod {{ $labels.pod }} uses {{ $value | humanizePercentage }} of its memory limit"
+        - alert: BackendApiCpuNearLimit
+          expr: |
+            max by (namespace, pod) (
+              rate(container_cpu_usage_seconds_total{namespace="backend-api", container="backend-api"}[5m])
+              / on (namespace, pod, container)
+              kube_pod_container_resource_limits{namespace="backend-api", container="backend-api", resource="cpu"}
+            ) > 0.85
+          for: 5m
+          labels:
+            severity: warning
+            service: backend-api
+          annotations:
+            summary: "backend-api: pod {{ $labels.pod }} uses {{ $value | humanizePercentage }} of its CPU limit"
+        - alert: BackendApiOomKilled
+          expr: |
+            max by (namespace, pod) (
+              kube_pod_container_status_last_terminated_reason{namespace="backend-api", container="backend-api", reason="OOMKilled"} == 1
+              and on (namespace, pod, container)
+              increase(kube_pod_container_status_restarts_total{namespace="backend-api", container="backend-api"}[10m]) > 0
+            )
+          labels:
+            severity: critical
+            service: backend-api
+          annotations:
+            summary: "backend-api: pod {{ $labels.pod }} was killed for exceeding its memory limit"
+        - alert: MlApiMemoryNearLimit
+          expr: |
+            max by (namespace, pod) (
+              container_memory_working_set_bytes{namespace="ml-api", container="ml-api"}
+              / on (namespace, pod, container)
+              kube_pod_container_resource_limits{namespace="ml-api", container="ml-api", resource="memory"}
+            ) > 0.85
+          for: 2m
+          labels:
+            severity: warning
+            service: ml-api
+          annotations:
+            summary: "ml-api: pod {{ $labels.pod }} uses {{ $value | humanizePercentage }} of its memory limit"
+        - alert: MlApiCpuNearLimit
+          expr: |
+            max by (namespace, pod) (
+              rate(container_cpu_usage_seconds_total{namespace="ml-api", container="ml-api"}[5m])
+              / on (namespace, pod, container)
+              kube_pod_container_resource_limits{namespace="ml-api", container="ml-api", resource="cpu"}
+            ) > 0.85
+          for: 5m
+          labels:
+            severity: warning
+            service: ml-api
+          annotations:
+            summary: "ml-api: pod {{ $labels.pod }} uses {{ $value | humanizePercentage }} of its CPU limit"
+        - alert: MlApiOomKilled
+          expr: |
+            max by (namespace, pod) (
+              kube_pod_container_status_last_terminated_reason{namespace="ml-api", container="ml-api", reason="OOMKilled"} == 1
+              and on (namespace, pod, container)
+              increase(kube_pod_container_status_restarts_total{namespace="ml-api", container="ml-api"}[10m]) > 0
+            )
+          labels:
+            severity: critical
+            service: ml-api
+          annotations:
+            summary: "ml-api: pod {{ $labels.pod }} was killed for exceeding its memory limit"
