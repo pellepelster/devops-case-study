@@ -4,6 +4,8 @@
 
 The original project from the GitHub repo showed some issues on my local machine regarding the timings of pod startup and the correct initialization of the database schema. I added an init container based wait to the `backend-api` to resolve that issue and increased the bootstrap wait timeouts.
 
+Password for login into Grafana (via port forward) is hardcoded admin/changeme and of course not meant for production usage. 
+
 # Goal and Context
 
 Provide a monitoring stack for the services `backend-api` and `ml-api` that are currently running in a K8S cluster. Both services already expose Prometheus compatible metrics endpoints, `backend-api` uses a PostgreSQL database as storage backend. The task is timeboxed to roughly 4 hours. The cluster and its workloads are manged and deployed via `fluxcd` 
@@ -39,21 +41,22 @@ The alarms are chosen to give a high-level summary to the on-call person without
 
 In a real scenario the alarm thresholds as well as the metrics dashboard need feedback from real operations to constantly refine acceptable thresholds and the definition of which metrics indicate a smoothly running platform.
 
-The alarm design follows the layers from the dashboard, and tries to have a few selected metrics that represent each layer. Especially the pod activity might lead to some noise and will need refinement in the beginning or depending on the scaling and deployment activity another approach.
+The alarm design follows the layers from the dashboard, and tries to have a few selected metrics that represent each layer. Especially the pod activity might lead to some noise and will need refinement in the beginning or depending on the scaling and deployment activity another approach. Here again I only added an explicit OOMKilled alarm, the other alarms like pod churn and failed pods pod restarts need some real life values from daily cluster operation to be useful as alarm indicators.
 
- The alarm `severity` can be used to drive the notification. A pod nearing its limit might be something an operator should look at during normal business hours, but nothing he needs to be woken up for during the night. An error rate of 100% on the other hand needs to be acted on as soon as possible.
+ The alarm `severity` can be used to drive the notification levels. A pod nearing its limit might be something an operator should look at during normal business hours, but nothing he needs to be woken up for during the night. An error rate of 100% on the other hand needs to be acted on as soon as possible.
 
-The error logs are explicitly not included in the alarms, as this typically needs some real-life experience over the typical error rates to again avoid alarm-fatigue. 
+The error logs are explicitly not included in the alarms, as this typically needs some real-life experience over the typical error rates and eventually some filtering to again avoid alarm-fatigue. 
 
 ## Open Topics
 
-* the percentiles in the overview are not 100% accurate, since the service only returns fixed response-time buckets, making the display 95% percentile a relatively accurate but still approximated value
-* For the alarms as well as for the metrics, once more data is available a comparison with previous points in time might also be valuable. E.g. whe the application has a predictable weekly recurring load-curve it could be useful to compare the current req/s with the same range a week ago to get a feeling if everything is whiting normal bounds. 
-*  There are some default alerts that must be taken care of, to avoid alarm fatigue for the on-call personal
-* the dashboard might become crowded once the service gain more endpoints and pods
+* the percentiles in the overview are not 100% accurate, since the service only returns fixed response-time buckets, making the display 95% percentile a relatively accurate but still approximated value, the detailed buckets are visible in the history panel below
+* For the alarms as well as for the metrics, once more data is available a comparison with previous points in time might also be valuable. E.g. when the application has a predictable weekly recurring load-curve it could be useful to compare the current req/s with the same range a week ago to get a feeling if everything is whiting normal bounds. 
+* There are some default alerts firing caused by some missing components in K3S that must be taken care of, to avoid alarm fatigue for the on-call personal
+* the dashboard might become crowded once the service gains more endpoints and pods, then a more high level per-service summary with service specific dashboards might be a good idea
 * monitoring of the K8S nodes is explicitly not a part the dashboard, this is more in the scope of the team operating the cluster not for the teams that runs the services. If a node has issues like CPU or I/O pressure this will show up indirectly in the service metrics anyway.
 * the credentials for the postgres-exporter should be a dedicated RO role and not shared with the application
 * add dedicated dashboards for `backen-api` and `ml-api` with full service log, and more service specific metrics.
 * add drilldown from the `devops-case-study` graphs to the dashboards with more details (K8S, PostgreSQL, Service dashboards) 
 * adding tracing could ease debugging allowing the operator e.g. to correlate a service request to a specific database query, or in case of cross-service communication to trace requests through all services 
 * currently the log error level is derived from the log text, structured logging (JSON) from service and metrics would make this more explicit and also enable the services to log additional metadata, e.g. when an error is logged also provide some context about which customer was affected.
+* the alarms would benefit from some links to dashboards for deeper root-cause investigation 
