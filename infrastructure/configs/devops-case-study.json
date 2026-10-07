@@ -12,6 +12,21 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "show firing alerts",
+        "expr": "ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"firing\"} or ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"firing\"}",
+        "step": "30s",
+        "titleFormat": "{{alertname}}",
+        "textFormat": "{{namespace}}{{service}} ({{severity}})",
+        "tagKeys": "severity"
       }
     ]
   },
@@ -27,6 +42,1036 @@
         "w": 24,
         "x": 0,
         "y": 0
+      },
+      "id": 40,
+      "title": "overview",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Share of requests answered with a 5xx status over the last 5 minutes. Orange from 1%, red from 5%, matching the error rate alerts. Health, readiness and metrics endpoints are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 41,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(rate(backend_api_requests_total{namespace=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", status=~\"5..\"}[5m])) or vector(0))\n/\nsum(rate(backend_api_requests_total{namespace=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[5m]))",
+          "legendFormat": "error rate",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "backend-api error rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "95th percentile of request duration over the last 5 minutes. Orange above 250 ms, the latency alert threshold. Health, readiness and metrics endpoints are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.25
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95,\n  sum by (le) (rate(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[5m]))\n)",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "backend-api p95 latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Requests per second over the last 5 minutes. Red when there is no traffic. Health, readiness and metrics endpoints are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0.001
+              }
+            ]
+          },
+          "unit": "reqps",
+          "decimals": 2,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 43,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(backend_api_requests_total{namespace=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[5m]))",
+          "legendFormat": "requests",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "backend-api requests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Available replicas next to the desired count. The colours assume 2 desired replicas as set in the deployment manifest: orange when some are missing, red at zero.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "desired"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 44,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_status_replicas_available{namespace=\"backend-api\", deployment=\"backend-api\"}",
+          "legendFormat": "ready",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_spec_replicas{namespace=\"backend-api\", deployment=\"backend-api\"}",
+          "legendFormat": "desired",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "backend-api replicas",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Share of requests answered with a 5xx status over the last 5 minutes. Orange from 1%, red from 5%, matching the error rate alerts. Health, readiness and metrics endpoints are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 5
+      },
+      "id": 45,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(rate(ml_api_requests_total{namespace=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", status=~\"5..\"}[5m])) or vector(0))\n/\nsum(rate(ml_api_requests_total{namespace=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[5m]))",
+          "legendFormat": "error rate",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ml-api error rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "95th percentile of request duration over the last 5 minutes. Orange above 1 s, the latency alert threshold. Health, readiness and metrics endpoints are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 5
+      },
+      "id": 46,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95,\n  sum by (le) (rate(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[5m]))\n)",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ml-api p95 latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Requests per second over the last 5 minutes. Red when there is no traffic. Health, readiness and metrics endpoints are excluded.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0.001
+              }
+            ]
+          },
+          "unit": "reqps",
+          "decimals": 2,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 5
+      },
+      "id": 47,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(ml_api_requests_total{namespace=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[5m]))",
+          "legendFormat": "requests",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ml-api requests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Available replicas next to the desired count. The colours assume 2 desired replicas as set in the deployment manifest: orange when some are missing, red at zero.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "desired"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 5
+      },
+      "id": 48,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_status_replicas_available{namespace=\"ml-api\", deployment=\"ml-api\"}",
+          "legendFormat": "ready",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_spec_replicas{namespace=\"ml-api\", deployment=\"ml-api\"}",
+          "legendFormat": "desired",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "ml-api replicas",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Number of alerts for the application namespaces that are currently firing, by severity. Includes the built-in Kubernetes alerts that concern these namespaces.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warning"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 16,
+        "y": 1
+      },
+      "id": 49,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "count(\n  ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"firing\", severity=\"critical\"}\n  or\n  ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"firing\", severity=\"critical\"}\n) or vector(0)",
+          "legendFormat": "critical",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "count(\n  ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"firing\", severity=\"warning\"}\n  or\n  ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"firing\", severity=\"warning\"}\n) or vector(0)",
+          "legendFormat": "warning",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "firing alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Predictions completed per second over the last 5 minutes (ml_api_predictions_total). Red when no predictions are being made.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0.001
+              }
+            ]
+          },
+          "unit": "ops",
+          "decimals": 2,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 16,
+        "y": 5
+      },
+      "id": 54,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(ml_api_predictions_total{namespace=\"ml-api\"}[5m]))",
+          "legendFormat": "predictions",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ml-api predictions",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Whether the postgres exporter can connect to the database (pg_up).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "down",
+                  "index": 0
+                },
+                "1": {
+                  "text": "up",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none",
+          "noValue": "no data"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 19,
+        "y": 5
+      },
+      "id": 50,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max(pg_up{namespace=\"postgres\"})",
+          "legendFormat": "postgres",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "postgres",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Alerts for the application namespaces over time, one row per alert: the application alerts from this repository and the built-in Kubernetes alerts that concern these namespaces. Yellow while pending (condition true, waiting time not yet passed), red while firing. A green row means no alert was pending or firing at that time.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "index": 0,
+                  "text": "no alerts"
+                },
+                "1": {
+                  "index": 1,
+                  "text": "pending"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "firing"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 22,
+        "x": 0,
+        "y": 9
+      },
+      "id": 53,
+      "options": {
+        "alignValue": "left",
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "mergeValues": true,
+        "rowHeight": 0.85,
+        "showValue": "never",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "range": true,
+          "refId": "A",
+          "legendFormat": "{{app}}: {{alertname}} ({{severity}})",
+          "expr": "max by (app, alertname, severity) (\n    label_replace(\n      ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"pending\"} or ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"firing\"} * 2,\n      \"app\", \"$1\", \"namespace\", \"(.+)\"\n    )\n  or\n    label_replace(\n      ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"pending\"} or ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"firing\"} * 2,\n      \"app\", \"$1\", \"service\", \"(.+)\"\n    )\n)"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "range": true,
+          "refId": "B",
+          "legendFormat": "no alerts pending or firing",
+          "expr": "vector(0) unless on() (\n  max by (app, alertname, severity) (\n      label_replace(\n        ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"pending\"} or ALERTS{alertname!=\"InfoInhibitor\", namespace=~\"backend-api|ml-api|postgres\", alertstate=\"firing\"} * 2,\n        \"app\", \"$1\", \"namespace\", \"(.+)\"\n      )\n    or\n      label_replace(\n        ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"pending\"} or ALERTS{alertname!=\"InfoInhibitor\", namespace=\"\", service=~\"backend-api|ml-api|postgres\", alertstate=\"firing\"} * 2,\n        \"app\", \"$1\", \"service\", \"(.+)\"\n      )\n  )\n)"
+        }
+      ],
+      "title": "alert history",
+      "type": "state-timeline"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
       },
       "id": 15,
       "title": "service requests",
@@ -94,7 +1139,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "≤ 10 ms"
+              "options": "\u2264 10 ms"
             },
             "properties": [
               {
@@ -109,7 +1154,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "10–50 ms"
+              "options": "10\u201350 ms"
             },
             "properties": [
               {
@@ -124,7 +1169,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "50–100 ms"
+              "options": "50\u2013100 ms"
             },
             "properties": [
               {
@@ -139,7 +1184,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "100–250 ms"
+              "options": "100\u2013250 ms"
             },
             "properties": [
               {
@@ -154,7 +1199,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "250–500 ms"
+              "options": "250\u2013500 ms"
             },
             "properties": [
               {
@@ -169,7 +1214,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "0.5–1 s"
+              "options": "0.5\u20131 s"
             },
             "properties": [
               {
@@ -184,7 +1229,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "1–2.5 s"
+              "options": "1\u20132.5 s"
             },
             "properties": [
               {
@@ -199,7 +1244,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "2.5–5 s"
+              "options": "2.5\u20135 s"
             },
             "properties": [
               {
@@ -214,7 +1259,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "5–10 s"
+              "options": "5\u201310 s"
             },
             "properties": [
               {
@@ -247,7 +1292,7 @@
         "h": 7,
         "w": 5,
         "x": 0,
-        "y": 1
+        "y": 16
       },
       "id": 8,
       "options": {
@@ -276,7 +1321,7 @@
           },
           "editorMode": "code",
           "expr": "sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.01\"}[$__rate_interval]))",
-          "legendFormat": "≤ 10 ms",
+          "legendFormat": "\u2264 10 ms",
           "range": true,
           "refId": "A"
         },
@@ -287,7 +1332,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.05\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.01\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "10–50 ms",
+          "legendFormat": "10\u201350 ms",
           "range": true,
           "refId": "B"
         },
@@ -298,7 +1343,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.1\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.05\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "50–100 ms",
+          "legendFormat": "50\u2013100 ms",
           "range": true,
           "refId": "C"
         },
@@ -309,7 +1354,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.25\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.1\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "100–250 ms",
+          "legendFormat": "100\u2013250 ms",
           "range": true,
           "refId": "D"
         },
@@ -320,7 +1365,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.5\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.25\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "250–500 ms",
+          "legendFormat": "250\u2013500 ms",
           "range": true,
           "refId": "E"
         },
@@ -331,7 +1376,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"1.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.5\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "0.5–1 s",
+          "legendFormat": "0.5\u20131 s",
           "range": true,
           "refId": "F"
         },
@@ -342,7 +1387,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"2.5\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"1.0\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "1–2.5 s",
+          "legendFormat": "1\u20132.5 s",
           "range": true,
           "refId": "G"
         },
@@ -353,7 +1398,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"5.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"2.5\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "2.5–5 s",
+          "legendFormat": "2.5\u20135 s",
           "range": true,
           "refId": "H"
         },
@@ -364,7 +1409,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"10.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"5.0\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "5–10 s",
+          "legendFormat": "5\u201310 s",
           "range": true,
           "refId": "I"
         },
@@ -397,7 +1442,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "requests per interval",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -442,7 +1487,7 @@
         "h": 7,
         "w": 5,
         "x": 5,
-        "y": 1
+        "y": 16
       },
       "id": 10,
       "options": {
@@ -470,14 +1515,15 @@
             "uid": "prometheus"
           },
           "editorMode": "builder",
-          "expr": "sum by(status, exported_endpoint) (increase(backend_api_requests_total{namespace=\"backend-api\"}[$__rate_interval]))",
+          "expr": "sum by(status, exported_endpoint) (increase(backend_api_requests_total{namespace=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[$__rate_interval]))",
           "legendFormat": "{{exported_endpoint}} ({{status}})",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "backend-api HTTP response status",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Requests handled by backend-api per interval, by endpoint and HTTP status code. Health, readiness and metrics endpoints are excluded. Any 5xx series is a server-side failure."
     },
     {
       "datasource": {
@@ -541,7 +1587,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "≤ 10 ms"
+              "options": "\u2264 10 ms"
             },
             "properties": [
               {
@@ -556,7 +1602,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "10–50 ms"
+              "options": "10\u201350 ms"
             },
             "properties": [
               {
@@ -571,7 +1617,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "50–100 ms"
+              "options": "50\u2013100 ms"
             },
             "properties": [
               {
@@ -586,7 +1632,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "100–250 ms"
+              "options": "100\u2013250 ms"
             },
             "properties": [
               {
@@ -601,7 +1647,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "250–500 ms"
+              "options": "250\u2013500 ms"
             },
             "properties": [
               {
@@ -616,7 +1662,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "0.5–1 s"
+              "options": "0.5\u20131 s"
             },
             "properties": [
               {
@@ -631,7 +1677,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "1–2.5 s"
+              "options": "1\u20132.5 s"
             },
             "properties": [
               {
@@ -646,7 +1692,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "2.5–5 s"
+              "options": "2.5\u20135 s"
             },
             "properties": [
               {
@@ -661,7 +1707,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "5–10 s"
+              "options": "5\u201310 s"
             },
             "properties": [
               {
@@ -694,7 +1740,7 @@
         "h": 7,
         "w": 5,
         "x": 11,
-        "y": 1
+        "y": 16
       },
       "id": 9,
       "options": {
@@ -723,7 +1769,7 @@
           },
           "editorMode": "code",
           "expr": "sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.01\"}[$__rate_interval]))",
-          "legendFormat": "≤ 10 ms",
+          "legendFormat": "\u2264 10 ms",
           "range": true,
           "refId": "A"
         },
@@ -734,7 +1780,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.05\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.01\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "10–50 ms",
+          "legendFormat": "10\u201350 ms",
           "range": true,
           "refId": "B"
         },
@@ -745,7 +1791,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.1\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.05\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "50–100 ms",
+          "legendFormat": "50\u2013100 ms",
           "range": true,
           "refId": "C"
         },
@@ -756,7 +1802,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.25\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.1\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "100–250 ms",
+          "legendFormat": "100\u2013250 ms",
           "range": true,
           "refId": "D"
         },
@@ -767,7 +1813,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.5\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.25\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "250–500 ms",
+          "legendFormat": "250\u2013500 ms",
           "range": true,
           "refId": "E"
         },
@@ -778,7 +1824,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"1.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.5\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "0.5–1 s",
+          "legendFormat": "0.5\u20131 s",
           "range": true,
           "refId": "F"
         },
@@ -789,7 +1835,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"2.5\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"1.0\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "1–2.5 s",
+          "legendFormat": "1\u20132.5 s",
           "range": true,
           "refId": "G"
         },
@@ -800,7 +1846,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"5.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"2.5\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "2.5–5 s",
+          "legendFormat": "2.5\u20135 s",
           "range": true,
           "refId": "H"
         },
@@ -811,7 +1857,7 @@
           },
           "editorMode": "code",
           "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"10.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"5.0\"}[$__rate_interval])),\n  0\n)",
-          "legendFormat": "5–10 s",
+          "legendFormat": "5\u201310 s",
           "range": true,
           "refId": "I"
         },
@@ -844,7 +1890,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "requests per interval",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -889,7 +1935,7 @@
         "h": 7,
         "w": 5,
         "x": 16,
-        "y": 1
+        "y": 16
       },
       "id": 14,
       "options": {
@@ -917,14 +1963,15 @@
             "uid": "prometheus"
           },
           "editorMode": "builder",
-          "expr": "sum by(status, exported_endpoint) (increase(ml_api_requests_total{namespace=\"ml-api\"}[$__rate_interval]))",
+          "expr": "sum by(status, exported_endpoint) (increase(ml_api_requests_total{namespace=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\"}[$__rate_interval]))",
           "legendFormat": "{{exported_endpoint}} ({{status}})",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "ml-api HTTP response status",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Requests handled by ml-api per interval, by endpoint and HTTP status code. Health, readiness and metrics endpoints are excluded. Any 5xx series is a server-side failure."
     },
     {
       "datasource": {
@@ -940,7 +1987,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "connections",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -992,7 +2039,7 @@
         "h": 7,
         "w": 5,
         "x": 0,
-        "y": 8
+        "y": 23
       },
       "id": 19,
       "options": {
@@ -1027,7 +2074,8 @@
         }
       ],
       "title": "backend-api database connections in use",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Database connections each backend-api pod currently has in use (backend_api_db_connections_active). The dashed line at 10 is the highest value a pod has reached, taken as the size of its connection pool; a pod sitting at the line has no free connections and further queries fail as pool_exhausted."
     },
     {
       "datasource": {
@@ -1044,7 +2092,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "queries per interval",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -1089,7 +2137,7 @@
         "h": 7,
         "w": 5,
         "x": 5,
-        "y": 8
+        "y": 23
       },
       "id": 20,
       "options": {
@@ -1127,15 +2175,293 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "memory",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "memory limit"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    8,
+                    6
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 11,
+        "y": 23
+      },
+      "id": 51,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (pod) (ml_api_memory_bytes{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\"})",
+          "legendFormat": "{{pod}} app reported",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"ml-api\", container=\"ml-api\", image!=\"\"})",
+          "legendFormat": "{{pod}} container",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max(kube_pod_container_resource_limits{namespace=\"ml-api\", container=\"ml-api\", resource=\"memory\"})",
+          "legendFormat": "memory limit",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "ml-api application memory",
+      "type": "timeseries",
+      "description": "Memory the ml-api application reports for itself (ml_api_memory_bytes) per pod, next to the memory the container actually uses and the container memory limit. A steadily rising line that approaches the limit ends in an OOM kill."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "per second",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/predict requests"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    8,
+                    6
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 16,
+        "y": 23
+      },
+      "id": 52,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(ml_api_predictions_total{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\"}[$__rate_interval]))",
+          "legendFormat": "predictions",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(ml_api_requests_total{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint=\"/predict\"}[$__rate_interval]))",
+          "legendFormat": "/predict requests",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "ml-api predictions vs requests",
+      "type": "timeseries",
+      "description": "Predictions completed per second (ml_api_predictions_total) next to incoming /predict requests per second. The two lines normally lie on top of each other; predictions falling below requests means requests are failing or hanging before a prediction is produced."
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 30
       },
-      "id": 16,
-      "title": "pods",
+      "id": 17,
+      "title": "database",
       "type": "row"
     },
     {
@@ -1146,8 +2472,443 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "red",
-            "mode": "fixed"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "connections",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              },
+              {
+                "color": "#EAB839",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 31
+      },
+      "id": 1,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (datname, state) (pg_stat_activity_count{datname=\"voize\"}) ",
+          "legendFormat": "{{state}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "voize database connections",
+      "type": "timeseries",
+      "description": "Connections to the voize database as postgres sees them (pg_stat_activity), by state. Idle connections are open but not running a query, typically held by connection pools; active ones are running a query."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "All open connections to the postgres server as a share of max_connections. At 100% new connections are refused.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "share of max_connections",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          },
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 5,
+        "x": 8,
+        "y": 31
+      },
+      "id": 24,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(pg_stat_activity_count{namespace=\"postgres\"})\n/\nmax(pg_settings_max_connections{namespace=\"postgres\"})",
+          "legendFormat": "connections used",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "postgres connection limit usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Age of the oldest open transaction in the voize database, for running queries (active) and for sessions holding a transaction open without doing anything (idle in transaction). A steadily climbing line means a query is hanging or blocked.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "transaction age",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              },
+              {
+                "color": "#EAB839",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 5,
+        "x": 13,
+        "y": 31
+      },
+      "id": 26,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max by (state) (\n  pg_stat_activity_max_tx_duration{namespace=\"postgres\", datname=\"voize\", state=~\"active|idle in transaction\"}\n)",
+          "legendFormat": "{{state}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "voize longest running transaction",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Locks currently held or awaited in the voize database, by lock mode. A few accesssharelock entries are normal; accessexclusivelock blocks every other query on the table.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "locks",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              },
+              {
+                "color": "#EAB839",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 4,
+        "x": 18,
+        "y": 31
+      },
+      "id": 25,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (mode) (pg_locks_count{namespace=\"postgres\", datname=\"voize\"}) > 0",
+          "legendFormat": "{{mode}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "voize database locks by mode",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 16,
+      "title": "pod activity",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
           "custom": {
             "axisPlacement": "auto",
@@ -1163,22 +2924,29 @@
           },
           "mappings": [
             {
+              "type": "value",
               "options": {
-                "1": {
-                  "color": "red",
+                "0": {
                   "index": 0,
+                  "text": "healthy"
+                },
+                "1": {
+                  "index": 1,
                   "text": "unhealthy"
                 }
-              },
-              "type": "value"
+              }
             }
           ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
               }
             ]
           }
@@ -1188,7 +2956,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 16
+        "y": 41
       },
       "id": 2,
       "options": {
@@ -1219,14 +2987,26 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (namespace, pod) (\n    (kube_pod_container_status_ready == bool 0) == 1\n      unless on (namespace, pod) (kube_pod_status_phase{phase=\"Succeeded\"} == 1)\n      unless on (namespace, pod) kube_pod_deletion_timestamp\n      unless on (namespace, pod) (time() - kube_pod_start_time < 60)\n  or\n    (increase(kube_pod_container_status_restarts_total[$__rate_interval]) > bool 0) == 1\n)",
+          "expr": "max by (namespace, pod) (\n    (kube_pod_container_status_ready{namespace=~\"backend-api|ml-api|postgres\"} == bool 0) == 1\n      unless on (namespace, pod) (kube_pod_status_phase{namespace=~\"backend-api|ml-api|postgres\", phase=\"Succeeded\"} == 1)\n      unless on (namespace, pod) kube_pod_deletion_timestamp{namespace=~\"backend-api|ml-api|postgres\"}\n      unless on (namespace, pod) (time() - kube_pod_start_time{namespace=~\"backend-api|ml-api|postgres\"} < 60)\n  or\n    (increase(kube_pod_container_status_restarts_total{namespace=~\"backend-api|ml-api|postgres\"}[$__rate_interval]) > bool 0) == 1\n)",
           "legendFormat": "{{namespace}}/{{pod}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "range": true,
+          "refId": "B",
+          "legendFormat": "all pods healthy",
+          "expr": "vector(0) unless on() (\n  max by (namespace, pod) (\n      (kube_pod_container_status_ready{namespace=~\"backend-api|ml-api|postgres\"} == bool 0) == 1\n        unless on (namespace, pod) (kube_pod_status_phase{namespace=~\"backend-api|ml-api|postgres\", phase=\"Succeeded\"} == 1)\n        unless on (namespace, pod) kube_pod_deletion_timestamp{namespace=~\"backend-api|ml-api|postgres\"}\n        unless on (namespace, pod) (time() - kube_pod_start_time{namespace=~\"backend-api|ml-api|postgres\"} < 60)\n    or\n      (increase(kube_pod_container_status_restarts_total{namespace=~\"backend-api|ml-api|postgres\"}[$__rate_interval]) > bool 0) == 1\n  )\n)"
         }
       ],
       "title": "unhealthy pods",
-      "type": "state-timeline"
+      "type": "state-timeline",
+      "description": "Pods in the backend-api, ml-api and postgres namespaces with a container that is not ready or that restarted during the interval, one row per pod. Pods that completed, are being deleted or started less than 60 seconds ago are left out. A green row means all pods were healthy at that time."
     },
     {
       "datasource": {
@@ -1242,7 +3022,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "pods",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -1284,14 +3064,16 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "min": 0,
+          "decimals": 0
         }
       },
       "gridPos": {
         "h": 6,
         "w": 6,
         "x": 8,
-        "y": 16
+        "y": 41
       },
       "id": 3,
       "options": {
@@ -1319,26 +3101,26 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count by (namespace) (time() - kube_pod_created < 300)",
-          "legendFormat": "__auto",
+          "expr": "count by (namespace) (time() - kube_pod_created{namespace=~\"backend-api|ml-api|postgres\"} < 300)\nor\ncount by (namespace) (kube_pod_created{namespace=~\"backend-api|ml-api|postgres\"}) * 0",
+          "legendFormat": "{{namespace}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "pods created in the last 5 min",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Number of pods created within the previous 5 minutes, per namespace. Zero in steady state; a bump marks a restart, rollout or reschedule. Limited to the backend-api, ml-api and postgres namespaces."
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Pods that have been in the Pending phase for more than 60 seconds: not yet scheduled to a node (for example requesting more CPU or memory than is available), or scheduled but unable to start their containers (for example an image that cannot be pulled). Empty when everything is running.",
+      "description": "Pods that have been in the Pending phase for more than 60 seconds: not yet scheduled to a node (for example requesting more CPU or memory than is available), or scheduled but unable to start their containers (for example an image that cannot be pulled). A green row means no pod was pending at that time. Limited to the backend-api, ml-api and postgres namespaces.",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "orange",
-            "mode": "fixed"
+            "mode": "thresholds"
           },
           "custom": {
             "axisPlacement": "auto",
@@ -1354,22 +3136,29 @@
           },
           "mappings": [
             {
+              "type": "value",
               "options": {
-                "1": {
-                  "color": "orange",
+                "0": {
                   "index": 0,
+                  "text": "none pending"
+                },
+                "1": {
+                  "index": 1,
                   "text": "pending"
                 }
-              },
-              "type": "value"
+              }
             }
           ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
               }
             ]
           }
@@ -1379,7 +3168,7 @@
         "h": 6,
         "w": 8,
         "x": 14,
-        "y": 16
+        "y": 41
       },
       "id": 30,
       "options": {
@@ -1410,10 +3199,21 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "max by (namespace, pod) (\n  (kube_pod_status_phase{phase=\"Pending\"} == 1)\n  and on (namespace, pod) (time() - kube_pod_created > 60)\n)",
+          "expr": "max by (namespace, pod) (\n  (kube_pod_status_phase{namespace=~\"backend-api|ml-api|postgres\", phase=\"Pending\"} == 1)\n  and on (namespace, pod) (time() - kube_pod_created{namespace=~\"backend-api|ml-api|postgres\"} > 60)\n)",
           "legendFormat": "{{namespace}}/{{pod}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "range": true,
+          "refId": "B",
+          "legendFormat": "no pending pods",
+          "expr": "vector(0) unless on() (\n  max by (namespace, pod) (\n    (kube_pod_status_phase{namespace=~\"backend-api|ml-api|postgres\", phase=\"Pending\"} == 1)\n    and on (namespace, pod) (time() - kube_pod_created{namespace=~\"backend-api|ml-api|postgres\"} > 60)\n  )\n)"
         }
       ],
       "title": "pending pods",
@@ -1424,12 +3224,11 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Why a pod is failing, one row per pod and reason: containers that cannot start (CrashLoopBackOff, ImagePullBackOff, ...), containers that were killed and restarted (OOMKilled, Error) and pods that cannot be scheduled (Unschedulable). Pods that are running but fail their readiness probe have no reason here; they only appear in \"unhealthy pods\".",
+      "description": "Why a pod is failing, one row per pod and reason: containers that cannot start (CrashLoopBackOff, ImagePullBackOff, ...), containers that were killed and restarted (OOMKilled, Error) and pods that cannot be scheduled (Unschedulable). Pods that are running but fail their readiness probe have no reason here; they only appear in \"unhealthy pods\". Limited to the backend-api, ml-api and postgres namespaces.",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "red",
-            "mode": "fixed"
+            "mode": "thresholds"
           },
           "custom": {
             "axisPlacement": "auto",
@@ -1445,22 +3244,29 @@
           },
           "mappings": [
             {
+              "type": "value",
               "options": {
-                "1": {
-                  "color": "red",
+                "0": {
                   "index": 0,
+                  "text": "no failures"
+                },
+                "1": {
+                  "index": 1,
                   "text": "failing"
                 }
-              },
-              "type": "value"
+              }
             }
           ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
               }
             ]
           }
@@ -1470,7 +3276,7 @@
         "h": 6,
         "w": 22,
         "x": 0,
-        "y": 22
+        "y": 47
       },
       "id": 31,
       "options": {
@@ -1504,11 +3310,34 @@
           "range": true,
           "refId": "A",
           "legendFormat": "{{namespace}}/{{pod}}: {{reason}}",
-          "expr": "max by (namespace, pod, reason) (\n  kube_pod_container_status_waiting_reason{reason!~\"ContainerCreating|PodInitializing\"} == 1\n)\nor\nmax by (namespace, pod, reason) (\n  (kube_pod_container_status_last_terminated_reason == 1)\n  and on (namespace, pod, container)\n  (increase(kube_pod_container_status_restarts_total[$__rate_interval]) > 0)\n)\nor\nlabel_replace(\n  max by (namespace, pod) (kube_pod_status_unschedulable == 1),\n  \"reason\", \"Unschedulable\", \"\", \"\"\n)"
+          "expr": "max by (namespace, pod, reason) (\n  kube_pod_container_status_waiting_reason{namespace=~\"backend-api|ml-api|postgres\", reason!~\"ContainerCreating|PodInitializing\"} == 1\n)\nor\nmax by (namespace, pod, reason) (\n  (kube_pod_container_status_last_terminated_reason{namespace=~\"backend-api|ml-api|postgres\"} == 1)\n  and on (namespace, pod, container)\n  (increase(kube_pod_container_status_restarts_total{namespace=~\"backend-api|ml-api|postgres\"}[$__rate_interval]) > 0)\n)\nor\nlabel_replace(\n  max by (namespace, pod) (kube_pod_status_unschedulable{namespace=~\"backend-api|ml-api|postgres\"} == 1),\n  \"reason\", \"Unschedulable\", \"\", \"\"\n)"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "range": true,
+          "refId": "B",
+          "legendFormat": "no pod failures",
+          "expr": "vector(0) unless on() (\n  max by (namespace, pod, reason) (\n    kube_pod_container_status_waiting_reason{namespace=~\"backend-api|ml-api|postgres\", reason!~\"ContainerCreating|PodInitializing\"} == 1\n  )\n  or\n  max by (namespace, pod, reason) (\n    (kube_pod_container_status_last_terminated_reason{namespace=~\"backend-api|ml-api|postgres\"} == 1)\n    and on (namespace, pod, container)\n    (increase(kube_pod_container_status_restarts_total{namespace=~\"backend-api|ml-api|postgres\"}[$__rate_interval]) > 0)\n  )\n  or\n  label_replace(\n    max by (namespace, pod) (kube_pod_status_unschedulable{namespace=~\"backend-api|ml-api|postgres\"} == 1),\n    \"reason\", \"Unschedulable\", \"\", \"\"\n  )\n)"
         }
       ],
       "title": "pod failure reasons",
       "type": "state-timeline"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "id": 55,
+      "title": "pod resources",
+      "type": "row"
     },
     {
       "datasource": {
@@ -1688,7 +3517,7 @@
         "h": 9,
         "w": 11,
         "x": 0,
-        "y": 28
+        "y": 54
       },
       "id": 5,
       "options": {
@@ -1709,7 +3538,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (namespace, workload) (\n  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace!~\"kube-system|flux-system|monitoring\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
+          "expr": "sum by (namespace, workload) (\n  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~\"backend-api|ml-api|postgres\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1721,7 +3550,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (namespace, workload) (\n  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace!~\"kube-system|flux-system|monitoring\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)\n/\nsum by (namespace, workload) (\n  kube_pod_container_resource_requests{resource=\"cpu\", namespace!~\"kube-system|flux-system|monitoring\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
+          "expr": "sum by (namespace, workload) (\n  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~\"backend-api|ml-api|postgres\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)\n/\nsum by (namespace, workload) (\n  kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"backend-api|ml-api|postgres\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1732,7 +3561,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (namespace, workload) (\n  container_memory_working_set_bytes{container!=\"\", image!=\"\", namespace!~\"kube-system|flux-system|monitoring\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
+          "expr": "sum by (namespace, workload) (\n  container_memory_working_set_bytes{container!=\"\", image!=\"\", namespace=~\"backend-api|ml-api|postgres\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1743,7 +3572,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max by (namespace, workload) (\n  sum by (namespace, pod, container) (\n    container_memory_working_set_bytes{container!=\"\", image!=\"\", namespace!~\"kube-system|flux-system|monitoring\"}\n  )\n  / on (namespace, pod, container)\n  kube_pod_container_resource_limits{resource=\"memory\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
+          "expr": "max by (namespace, workload) (\n  sum by (namespace, pod, container) (\n    container_memory_working_set_bytes{container!=\"\", image!=\"\", namespace=~\"backend-api|ml-api|postgres\"}\n  )\n  / on (namespace, pod, container)\n  kube_pod_container_resource_limits{resource=\"memory\"}\n  * on (namespace, pod) group_left (workload)\n  namespace_workload_pod:kube_pod_owner:relabel\n)",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1774,7 +3603,8 @@
           }
         }
       ],
-      "type": "table"
+      "type": "table",
+      "description": "Current CPU and memory use per workload, with CPU as a share of the CPU request and memory as a share of the memory limit (taken from the container closest to its limit). Limited to the backend-api, ml-api and postgres namespaces."
     },
     {
       "datasource": {
@@ -1790,7 +3620,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "memory (working set)",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -1840,7 +3670,7 @@
         "h": 9,
         "w": 11,
         "x": 11,
-        "y": 28
+        "y": 54
       },
       "id": 7,
       "options": {
@@ -1868,14 +3698,15 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "topk(10,\n  sum by (namespace, pod) (\n    container_memory_working_set_bytes{container!=\"\", image!=\"\", namespace!~\"kube-system|flux-system|monitoring\"}\n  )\n)",
+          "expr": "topk(10,\n  sum by (namespace, pod) (\n    container_memory_working_set_bytes{container!=\"\", image!=\"\", namespace=~\"backend-api|ml-api|postgres\"}\n  )\n)",
           "legendFormat": "{{namespace}}/{{pod}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "memory usage per pod",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Memory in use (working set) per pod, for the ten pods using the most. Working set is what counts against the memory limit. Limited to the backend-api, ml-api and postgres namespaces."
     },
     {
       "datasource": {
@@ -1891,7 +3722,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "CPU cores",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -1941,7 +3772,7 @@
         "h": 9,
         "w": 11,
         "x": 0,
-        "y": 37
+        "y": 63
       },
       "id": 6,
       "options": {
@@ -1969,21 +3800,22 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "topk(10,\n  sum by (namespace, pod) (\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace!~\"kube-system|flux-system|monitoring\"}\n  )\n)",
+          "expr": "topk(10,\n  sum by (namespace, pod) (\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=~\"backend-api|ml-api|postgres\"}\n  )\n)",
           "legendFormat": "{{namespace}}/{{pod}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "CPU usage per pod",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "CPU cores in use per pod, for the ten pods using the most. 0.5 means half a core. Limited to the backend-api, ml-api and postgres namespaces."
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Share of CPU scheduling periods in which the pod was throttled by its CPU limit. 0% means the limit is never hit; sustained values above roughly 25% usually show up as higher request latency.",
+      "description": "Share of CPU scheduling periods in which the pod was throttled by its CPU limit. 0% means the limit is never hit; sustained values above roughly 25% usually show up as higher request latency. Limited to the backend-api, ml-api and postgres namespaces.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1993,7 +3825,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "throttled CPU periods",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
@@ -2045,7 +3877,7 @@
         "h": 9,
         "w": 11,
         "x": 11,
-        "y": 37
+        "y": 63
       },
       "id": 18,
       "options": {
@@ -2073,7 +3905,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "topk(10,\n  sum by (namespace, pod) (\n    rate(container_cpu_cfs_throttled_periods_total{container!=\"\", namespace!~\"kube-system|flux-system|monitoring\"}[$__rate_interval])\n  )\n  /\n  sum by (namespace, pod) (\n    rate(container_cpu_cfs_periods_total{container!=\"\", namespace!~\"kube-system|flux-system|monitoring\"}[$__rate_interval])\n  )\n)",
+          "expr": "topk(10,\n  sum by (namespace, pod) (\n    rate(container_cpu_cfs_throttled_periods_total{container!=\"\", namespace=~\"backend-api|ml-api|postgres\"}[$__rate_interval])\n  )\n  /\n  sum by (namespace, pod) (\n    rate(container_cpu_cfs_periods_total{container!=\"\", namespace=~\"backend-api|ml-api|postgres\"}[$__rate_interval])\n  )\n)",
           "legendFormat": "{{namespace}}/{{pod}}",
           "range": true,
           "refId": "A"
@@ -2081,481 +3913,16 @@
       ],
       "title": "CPU throttling per pod",
       "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 46
-      },
-      "id": 17,
-      "title": "database",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              }
-            ]
-          }
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 0,
-        "y": 47
-      },
-      "id": 1,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (datname, state) (pg_stat_activity_count{datname=\"voize\"}) ",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "voize database connections",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "All open connections to the postgres server as a share of max_connections. At 100% new connections are refused.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "dashed"
-            }
-          },
-          "max": 1,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 0.8
-              }
-            ]
-          },
-          "unit": "percentunit"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 5,
-        "x": 8,
-        "y": 47
-      },
-      "id": 24,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(pg_stat_activity_count{namespace=\"postgres\"})\n/\nmax(pg_settings_max_connections{namespace=\"postgres\"})",
-          "legendFormat": "connections used",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "postgres connection limit usage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Age of the oldest open transaction in the voize database, for running queries (active) and for sessions holding a transaction open without doing anything (idle in transaction). A steadily climbing line means a query is hanging or blocked.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "s"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 5,
-        "x": 13,
-        "y": 47
-      },
-      "id": 26,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "max by (state) (\n  pg_stat_activity_max_tx_duration{namespace=\"postgres\", datname=\"voize\", state=~\"active|idle in transaction\"}\n)",
-          "legendFormat": "{{state}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "voize longest running transaction",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Locks currently held or awaited in the voize database, by lock mode. A few accesssharelock entries are normal; accessexclusivelock blocks every other query on the table.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 0,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "short"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 4,
-        "x": 18,
-        "y": 47
-      },
-      "id": 25,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (mode) (pg_locks_count{namespace=\"postgres\", datname=\"voize\"}) > 0",
-          "legendFormat": "{{mode}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "voize database locks by mode",
-      "type": "timeseries"
     }
   ],
   "preload": false,
-  "refresh": "",
+  "refresh": "10s",
   "schemaVersion": 42,
   "templating": {
-    "list": [
-      {
-        "allowCustomValue": true,
-        "current": {
-          "text": "",
-          "value": ""
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_names()",
-        "hide": 0,
-        "includeAll": false,
-        "label": "namespace",
-        "multi": true,
-        "name": "namespace",
-        "options": [],
-        "query": {
-          "qryType": 0,
-          "query": "label_names()",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "regexApplyTo": "value",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      }
-    ]
+    "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
