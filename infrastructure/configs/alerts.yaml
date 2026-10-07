@@ -215,7 +215,7 @@ spec:
         - alert: BackendApiMemoryNearLimit
           expr: |
             max by (namespace, pod) (
-              container_memory_working_set_bytes{namespace="backend-api", container="backend-api"}
+              max by (namespace, pod, container) (container_memory_working_set_bytes{namespace="backend-api", container="backend-api"})
               / on (namespace, pod, container)
               kube_pod_container_resource_limits{namespace="backend-api", container="backend-api", resource="memory"}
             ) > 0.85
@@ -228,7 +228,7 @@ spec:
         - alert: BackendApiCpuNearLimit
           expr: |
             max by (namespace, pod) (
-              rate(container_cpu_usage_seconds_total{namespace="backend-api", container="backend-api"}[5m])
+              max by (namespace, pod, container) (rate(container_cpu_usage_seconds_total{namespace="backend-api", container="backend-api"}[5m]))
               / on (namespace, pod, container)
               kube_pod_container_resource_limits{namespace="backend-api", container="backend-api", resource="cpu"}
             ) > 0.85
@@ -253,7 +253,7 @@ spec:
         - alert: MlApiMemoryNearLimit
           expr: |
             max by (namespace, pod) (
-              container_memory_working_set_bytes{namespace="ml-api", container="ml-api"}
+              max by (namespace, pod, container) (container_memory_working_set_bytes{namespace="ml-api", container="ml-api"})
               / on (namespace, pod, container)
               kube_pod_container_resource_limits{namespace="ml-api", container="ml-api", resource="memory"}
             ) > 0.85
@@ -266,7 +266,7 @@ spec:
         - alert: MlApiCpuNearLimit
           expr: |
             max by (namespace, pod) (
-              rate(container_cpu_usage_seconds_total{namespace="ml-api", container="ml-api"}[5m])
+              max by (namespace, pod, container) (rate(container_cpu_usage_seconds_total{namespace="ml-api", container="ml-api"}[5m]))
               / on (namespace, pod, container)
               kube_pod_container_resource_limits{namespace="ml-api", container="ml-api", resource="cpu"}
             ) > 0.85

@@ -52,7 +52,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Share of requests answered with a 5xx status over the last 5 minutes. Orange from 1%, red from 5%, matching the error rate alerts. Health, readiness and metrics endpoints are excluded.",
+      "description": "Share of requests answered with a 5xx status over the last 5 minutes. Orange from 1%, red from 5%, the thresholds of the error rate alerts (the 1% warning alert uses a 30-minute window, this tile 5 minutes). Health, readiness and metrics endpoints are excluded.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -371,7 +371,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Share of requests answered with a 5xx status over the last 5 minutes. Orange from 1%, red from 5%, matching the error rate alerts. Health, readiness and metrics endpoints are excluded.",
+      "description": "Share of requests answered with a 5xx status over the last 5 minutes. Orange from 1%, red from 5%, the thresholds of the error rate alerts (the 1% warning alert uses a 30-minute window, this tile 5 minutes). Health, readiness and metrics endpoints are excluded.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -690,7 +690,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Number of alerts for the application namespaces that are currently firing, by severity. Includes the built-in Kubernetes alerts that concern these namespaces.",
+      "description": "Number of alerts for the backend-api, ml-api and postgres namespaces that are currently firing, split into critical and warning. Includes the built-in Kubernetes alerts that concern these namespaces; info-level alerts are not counted.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1082,7 +1082,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Requests per latency bucket, stacked so the total height is the total number of requests, exactly as recorded by the backend_api_request_duration_seconds histogram (no interpolation). Each band is one bucket; slower buckets are drawn in warmer colours, so a slowdown shows up as yellow/red bands growing.",
+      "description": "Requests per latency bucket, stacked so the total height is the total number of requests, taken from the backend_api_request_duration_seconds histogram buckets without estimating percentiles (increase() still extrapolates counts over the interval, so values are not whole numbers). Health, readiness and metrics endpoints are excluded. Each band is one bucket; slower buckets are drawn in warmer colours, so a slowdown shows up as yellow/red bands growing.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1320,7 +1320,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.01\"}[$__rate_interval]))",
+          "expr": "sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.01\"}[$__rate_interval]))",
           "legendFormat": "\u2264 10 ms",
           "range": true,
           "refId": "A"
@@ -1331,7 +1331,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.05\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.01\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.05\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.01\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "10\u201350 ms",
           "range": true,
           "refId": "B"
@@ -1342,7 +1342,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.1\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.05\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.1\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.05\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "50\u2013100 ms",
           "range": true,
           "refId": "C"
@@ -1353,7 +1353,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.25\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.1\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.25\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.1\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "100\u2013250 ms",
           "range": true,
           "refId": "D"
@@ -1364,7 +1364,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.5\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.25\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.5\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.25\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "250\u2013500 ms",
           "range": true,
           "refId": "E"
@@ -1375,7 +1375,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"1.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"0.5\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"1.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.5\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "0.5\u20131 s",
           "range": true,
           "refId": "F"
@@ -1386,7 +1386,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"2.5\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"1.0\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"2.5\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"1.0\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "1\u20132.5 s",
           "range": true,
           "refId": "G"
@@ -1397,7 +1397,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"5.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"2.5\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"5.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"2.5\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "2.5\u20135 s",
           "range": true,
           "refId": "H"
@@ -1408,7 +1408,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"10.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"5.0\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"10.0\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"5.0\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "5\u201310 s",
           "range": true,
           "refId": "I"
@@ -1419,7 +1419,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"+Inf\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", le=\"10.0\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"+Inf\"}[$__rate_interval]))\n  -\n  sum(increase(backend_api_request_duration_seconds_bucket{namespace=\"backend-api\", job=\"backend-api\", container=\"backend-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"10.0\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "> 10 s",
           "range": true,
           "refId": "J"
@@ -1530,7 +1530,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Requests per latency bucket, stacked so the total height is the total number of requests, exactly as recorded by the ml_api_request_duration_seconds histogram (no interpolation). Each band is one bucket; slower buckets are drawn in warmer colours, so a slowdown shows up as yellow/red bands growing.",
+      "description": "Requests per latency bucket, stacked so the total height is the total number of requests, taken from the ml_api_request_duration_seconds histogram buckets without estimating percentiles (increase() still extrapolates counts over the interval, so values are not whole numbers). Health, readiness and metrics endpoints are excluded. Each band is one bucket; slower buckets are drawn in warmer colours, so a slowdown shows up as yellow/red bands growing.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1768,7 +1768,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.01\"}[$__rate_interval]))",
+          "expr": "sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.01\"}[$__rate_interval]))",
           "legendFormat": "\u2264 10 ms",
           "range": true,
           "refId": "A"
@@ -1779,7 +1779,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.05\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.01\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.05\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.01\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "10\u201350 ms",
           "range": true,
           "refId": "B"
@@ -1790,7 +1790,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.1\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.05\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.1\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.05\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "50\u2013100 ms",
           "range": true,
           "refId": "C"
@@ -1801,7 +1801,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.25\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.1\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.25\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.1\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "100\u2013250 ms",
           "range": true,
           "refId": "D"
@@ -1812,7 +1812,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.5\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.25\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.5\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.25\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "250\u2013500 ms",
           "range": true,
           "refId": "E"
@@ -1823,7 +1823,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"1.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"0.5\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"1.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"0.5\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "0.5\u20131 s",
           "range": true,
           "refId": "F"
@@ -1834,7 +1834,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"2.5\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"1.0\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"2.5\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"1.0\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "1\u20132.5 s",
           "range": true,
           "refId": "G"
@@ -1845,7 +1845,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"5.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"2.5\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"5.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"2.5\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "2.5\u20135 s",
           "range": true,
           "refId": "H"
@@ -1856,7 +1856,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"10.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"5.0\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"10.0\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"5.0\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "5\u201310 s",
           "range": true,
           "refId": "I"
@@ -1867,7 +1867,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"+Inf\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", le=\"10.0\"}[$__rate_interval])),\n  0\n)",
+          "expr": "clamp_min(\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"+Inf\"}[$__rate_interval]))\n  -\n  sum(increase(ml_api_request_duration_seconds_bucket{namespace=\"ml-api\", job=\"ml-api\", container=\"ml-api\", exported_endpoint!~\"/health|/ready|/metrics\", le=\"10.0\"}[$__rate_interval])),\n  0\n)",
           "legendFormat": "> 10 s",
           "range": true,
           "refId": "J"
@@ -2075,7 +2075,7 @@
       ],
       "title": "backend-api database connections in use",
       "type": "timeseries",
-      "description": "Database connections each backend-api pod currently has in use (backend_api_db_connections_active). The dashed line at 10 is the highest value a pod has reached, taken as the size of its connection pool; a pod sitting at the line has no free connections and further queries fail as pool_exhausted."
+      "description": "Database connections each backend-api pod currently has in use (backend_api_db_connections_active). The dashed line at 10 is the size of the per-pod connection pool; a pod sitting at the line has no free connections and further requests fail with 503 and are counted as pool_exhausted."
     },
     {
       "datasource": {
@@ -2574,7 +2574,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "All open connections to the postgres server as a share of max_connections. At 100% new connections are refused.",
+      "description": "All client connections to the postgres server as a share of max_connections. Close to 100% new connections are refused (postgres keeps a few slots, superuser_reserved_connections, for superusers only).",
       "fieldConfig": {
         "defaults": {
           "color": {
