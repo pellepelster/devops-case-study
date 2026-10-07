@@ -51,10 +51,13 @@ The error logs are explicitly not included in the alerts, as this typically need
 * adding tracing could ease debugging allowing the operator e.g. to correlate a service request to a specific database query, or in case of cross-service communication to trace requests through all services
 * currently the log error level is derived from the log text, structured logging (JSON) from service and metrics would make this more explicit and also enable the services to log additional metadata, e.g. when an error is logged also provide some context about which customer was affected.
 * the alerts would benefit from some links to dashboards for deeper root-cause investigation
-* the alerts and metrics that catch the false positive case (not logs/metrics) could be improved. Currently they only fire when everything drops to zero, real life scenarios might be very close to zero instead of absolutely zero
+* the alerts and metrics that catch the false positive case (not logs/metrics) could be improved. Currently, they only fire when everything drops to zero, real life scenarios might be very close to zero instead of absolutely zero
+* the coloring scheme for the response times currently only fit the `backen-api` service, during normal operation of the `ml-api` the scheme shows warning colors for what seems to be normal operation 
 
 ## Notes
 
 The original project from the GitHub repo showed some issues on my local machine regarding the timings of pod startup and the correct initialization of the database schema. I added an init container based wait to the `backend-api` to resolve that issue and increased the bootstrap wait timeouts.
 
 Password for login into Grafana (via port forward) is hardcoded admin/changeme and of course not meant for production usage.
+
+The implementation was partly AI assisted (Claude).
