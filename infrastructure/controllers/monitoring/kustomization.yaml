@@ -4,3 +4,6 @@ resources:
   - namespace.yaml
   - helmrepos.yaml
   - kube-prometheus-stack.yaml
+  - loki.yaml
+  - alloy.yaml
+  - loki-datasource.yaml
