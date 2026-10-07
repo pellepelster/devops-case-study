@@ -59,4 +59,5 @@ The error logs are explicitly not included in the alarms, as this typically need
 * add drilldown from the `devops-case-study` graphs to the dashboards with more details (K8S, PostgreSQL, Service dashboards) 
 * adding tracing could ease debugging allowing the operator e.g. to correlate a service request to a specific database query, or in case of cross-service communication to trace requests through all services 
 * currently the log error level is derived from the log text, structured logging (JSON) from service and metrics would make this more explicit and also enable the services to log additional metadata, e.g. when an error is logged also provide some context about which customer was affected.
-* the alarms would benefit from some links to dashboards for deeper root-cause investigation 
+* the alarms would benefit from some links to dashboards for deeper root-cause investigation
+* the alarm and metrics that catches the false positive case (not logs/metrics) could be improved on. currently it only fires when everything drops to zero, real life scenarios might be more very close to zero instead of absolutely zero 
