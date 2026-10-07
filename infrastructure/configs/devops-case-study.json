@@ -3913,6 +3913,59 @@
       ],
       "title": "CPU throttling per pod",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "id": 56,
+      "title": "logs",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "id": 57,
+      "type": "logs",
+      "title": "error logs",
+      "description": "Log lines from the backend-api, ml-api and postgres namespaces whose level Loki detected as error, newest first. The level is taken from the line itself (a level field or an error keyword), so lines without a recognisable level do not appear here. Click a line to see its pod and container; the Explore view on the Loki datasource shows the lines around it.",
+      "gridPos": {
+        "h": 12,
+        "w": 22,
+        "x": 0,
+        "y": 73
+      },
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "queryType": "range",
+          "refId": "A",
+          "maxLines": 500,
+          "expr": "{namespace=~\"backend-api|ml-api|postgres\"} | detected_level=\"error\""
+        }
+      ],
+      "pluginVersion": "13.0.1"
     }
   ],
   "preload": false,
